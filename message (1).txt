@@ -1,0 +1,47 @@
+<!-- Main Feed -->
+        <main class="feed">
+            <!-- Create Post -->
+            <div class="create-post">
+                <form method="POST" action="../backend/criar_publicacao.php" enctype="multipart/form-data"
+                    id="postForm">
+                    <input type="file" name="media0" hidden id="media0" accept="image/*,video/*">
+                    <input type="file" name="media1" hidden id="media1" accept="image/*,video/*">
+                    <input type="file" name="media2" hidden id="media2" accept="image/*,video/*">
+                    <input type="file" name="media3" hidden id="media3" accept="image/*,video/*">
+                    <input type="file" name="media4" hidden id="media4" accept="image/*,video/*">
+
+                    <div class="post-input">
+                        <?php
+                        $fotoPerfil = !empty($perfilData['foto_perfil']) ? "images/perfil/" . $perfilData['foto_perfil'] : "images/perfil/default-profile.jpg";
+                        ?>
+                        <img src="<?php echo $fotoPerfil ?>" alt="Profile" class="profile-pic">
+                        <textarea name="conteudo" placeholder="Partilhe com o mundo..." maxlength="500"></textarea>
+                    </div>
+
+                    <!-- Container de pré-visualização das imagens -->
+                    <div id="previewGrid" class="flex gap-1">
+                        <?php
+                        for ($i = 0; $i < 5; $i++) {
+                            ?>
+                            <div class="relative w-[100px] h-[100px] rounded-lg bg-gray-100 overflow-hidden hidden"
+                                id="preview-container-<?= $i ?>">
+                                <img id="preview-img-<?= $i ?>" class="object-cover w-full h-full">
+                                <button type="button" onclick="removeFile(<?= $i ?>)"
+                                    class="absolute top-1 right-1 bg-[#FF5722] hover:bg-[#bf4019] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">×</button>
+                            </div>
+                            <?php
+                        }
+                        ?>
+                    </div>
+
+                    <div class="post-actions">
+                        <div class="action-icons">
+                            <button type="button" id="uploadImage"><i class="fas fa-image"></i></button>
+                            <button type="button"><i class="fas fa-file-alt"></i></button>
+                            <button type="button"><i class="fas fa-link"></i></button>
+                            <button type="button"><i class="fas fa-poll"></i></button>
+                        </div>
+                        <button type="submit" name="publicar" class="publish-btn">Publicar</button>
+                    </div>
+                </form>
+            </div>
