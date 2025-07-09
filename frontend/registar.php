@@ -9,7 +9,6 @@ $emailError = isset($_SESSION['erro']) && $_SESSION['erro'] == 'Email já regist
 unset($_SESSION['erro']);
 ?>
 
-
 <!DOCTYPE html>
 <html lang="pt">
 
@@ -53,29 +52,27 @@ unset($_SESSION['erro']);
                 <div class="form-group">
                     <input type="text" name="nick" id="nick" placeholder="Nome de utilizador" maxlength="16" required>
                     <span class="info-icon"
-                        data-tooltip="O seu nome de exibição deve ter entre 3 e 16 caracteres, e pode conter letras e números, além de traços, pontos, sublinhados e espaços não consecutivos.">
+                        data-tooltip="O seu nome de utilizador deve ter entre 3 e 16 caracteres, e pode conter letras, números, pontos e sublinhados. Não são permitidos espaços.">
                         <svg xmlns="http://www.w3.org/2000/svg" height="35" width="35" fill="#757575"
                             viewBox="0 0 16 16">
                             <path
                                 d="M8 1.5A6.5 6.5 0 1 0 8 14.5A6.5 6.5 0 0 0 8 1.5zm0 12A5.5 5.5 0 1 1 8 2.5A5.5 5.5 0 0 1 8 13.5zM7.75 5.5h.5a.25.25 0 0 1 .25.25v.5a.25.25 0 0 1-.25.25h-.5A.25.25 0 0 1 7.5 6.25v-.5a.25.25 0 0 1 .25-.25zM7.5 7h1v5h-1z" />
                         </svg></span>
-                    <p class="error-text" id="nickError">Nome de utilizador já está em uso.</p>
+                    <p class="error-text" id="nickError">Nome de utilizador inválido.</p>
                 </div>
-
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <input type="password" id="password" name="password" required placeholder="Palavra-passe">
+                    <input type="password" id="password" name="password" required placeholder="Palavra-passe" minlength="6">
+                    <p class="error-text" id="passwordError">A palavra-passe deve ter pelo menos 6 caracteres.</p>
                 </div>
 
                 <div class="form-group">
                     <input type="password" id="confirm_password" name="confirm_password" required
                         placeholder="Confirmar palavra-passe">
+                    <p class="error-text" id="confirmPasswordError">As palavras-passe não coincidem.</p>
                 </div>
-                
-                <p id="passwordMismatch" style="font-size: 0.9em; margin-left: 323px;">As
-                        palavras-passe não coincidem.</p>
             </div>
 
             <div class="form-group">
@@ -94,151 +91,348 @@ unset($_SESSION['erro']);
     </footer>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const form = document.getElementById('signupForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const passwordInput = document.getElementById('password');
-        const confirmPasswordInput = document.getElementById('confirm_password');
-        const nameInput = document.getElementById('name');
-        const nickInput = document.getElementById('nick');
-        const emailInput = document.getElementById('email');
-        const termsCheckbox = document.getElementById('termos');
-        const requiredInputs = form.querySelectorAll('input[required]');
-        const dateInput = document.getElementById('date');
-        const dateError = document.getElementById('dateError');
-
-        // Evento para impedir números na entrada do campo 'name'
-        nameInput.addEventListener('input', function (e) {
-            this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
-        });
-
-        // Eventos para validações em tempo real
-        passwordInput.addEventListener('input', validatePasswords);
-        confirmPasswordInput.addEventListener('input', validatePasswords);
-        nameInput.addEventListener('blur', validateName);
-        nickInput.addEventListener('blur', validateNick);
-        emailInput.addEventListener('blur', validateEmail);
-        termsCheckbox.addEventListener('change', checkFormValidity);
-        dateInput.addEventListener('blur', validateDate);
-
-        requiredInputs.forEach(input => {
-            input.addEventListener('input', checkFormValidity);
-        });
-
-        function capitalizeName(name) {
-            return name
-                .toLowerCase()
-                .replace(/\s+/g, ' ') // Substitui múltiplos espaços por um único espaço
-                .trim() // Remove espaços no início e fim
-                .split(' ')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ');
-        }
-
-        nameInput.addEventListener('blur', function () {
-            nameInput.value = capitalizeName(nameInput.value.trim());
-        });
-
-        async function validateNick() {
-            const nickError = document.getElementById('nickError');
-            const response = await fetch(`../backend/check_nick.php?nick=${nickInput.value}`);
-            const result = await response.text();
-            if (result === 'exist') {
-                nickError.style.color = 'red';
-                nickInput.classList.add('incorreto');
-            } else {
-                nickError.style.color = 'transparent';
-                nickInput.classList.remove('incorreto');
-            }
-        }
-
-        async function validateEmail() {
-            const emailError = document.getElementById('emailError');
-            const response = await fetch(`../backend/check_email.php?email=${emailInput.value}`);
-            const result = await response.text();
-            if (result === 'exist') {
-                emailError.style.color = 'red';
-                emailInput.classList.add('incorreto');
-            } else {
-                emailError.style.color = 'transparent';
-                emailInput.classList.remove('incorreto');
-            }
-        }
-
-        function validatePasswords() {
-            const mismatchError = document.getElementById('passwordMismatch');
-            if (passwordInput.value !== confirmPasswordInput.value) {
-                mismatchError.style.color = 'red';
-                confirmPasswordInput.classList.add('passred');
-            } else {
-                mismatchError.style.color = 'transparent';
-                confirmPasswordInput.classList.remove('passred');
-            }
-        }
-
-        function validateName() {
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('signupForm');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Inputs
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            const dateInput = document.getElementById('date');
+            const nickInput = document.getElementById('nick');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirm_password');
+            const termsCheckbox = document.getElementById('termos');
+            
+            // Error elements
             const nameError = document.getElementById('nameError');
-            const trimmedValue = nameInput.value.trim();
+            const emailError = document.getElementById('emailError');
+            const dateError = document.getElementById('dateError');
+            const nickError = document.getElementById('nickError');
+            const passwordError = document.getElementById('passwordError');
+            const confirmPasswordError = document.getElementById('confirmPasswordError');
 
-            if (trimmedValue.length < 3 || /\d/.test(trimmedValue)) {
-                nameError.style.color = 'red';
-            } else {
-                nameError.style.color = 'transparent';
+            // Validation states
+            const validationState = {
+                name: false,
+                email: false,
+                date: false,
+                nick: false,
+                password: false,
+                confirmPassword: false,
+                terms: false
+            };
+
+            // Utility functions
+            function showError(errorElement, message) {
+                errorElement.textContent = message;
+                errorElement.style.color = 'red';
             }
 
-            if(trimmedValue == 0)
-            {
-                nameError.style.color = 'transparent';
+            function hideError(errorElement) {
+                errorElement.style.color = 'transparent';
             }
 
-            // Atualiza a validade do formulário
-            checkFormValidity();
-        }
+            function updateSubmitButton() {
+                const allValid = Object.values(validationState).every(state => state === true);
+                submitBtn.disabled = !allValid;
+            }
 
-        function checkFormValidity() {
-            let isValid = true;
-            requiredInputs.forEach(input => {
-                if (!input.value.trim() || input.classList.contains('incorreto')) {
-                    isValid = false;
+            function capitalizeName(name) {
+                return name
+                    .toLowerCase()
+                    .replace(/\s+/g, ' ')
+                    .trim()
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+            }
+
+            // Name validation
+            function validateName() {
+                const value = nameInput.value.trim();
+                
+                if (value.length === 0) {
+                    hideError(nameError);
+                    nameInput.classList.remove('incorreto');
+                    validationState.name = false;
+                } else if (value.length < 3) {
+                    showError(nameError, 'Nome deve ter pelo menos 3 caracteres.');
+                    nameInput.classList.add('incorreto');
+                    validationState.name = false;
+                } else if (/\d/.test(value)) {
+                    showError(nameError, 'Nome não pode conter números.');
+                    nameInput.classList.add('incorreto');
+                    validationState.name = false;
+                } else {
+                    hideError(nameError);
+                    nameInput.classList.remove('incorreto');
+                    validationState.name = true;
+                }
+                
+                updateSubmitButton();
+            }
+
+            // Nick validation
+            function validateNick() {
+                const value = nickInput.value.trim();
+                
+                if (value.length === 0) {
+                    hideError(nickError);
+                    nickInput.classList.remove('incorreto');
+                    validationState.nick = false;
+                } else if (value.length < 3) {
+                    showError(nickError, 'Nome de utilizador deve ter pelo menos 3 caracteres.');
+                    nickInput.classList.add('incorreto');
+                    validationState.nick = false;
+                } else if (value.length > 16) {
+                    showError(nickError, 'Nome de utilizador deve ter no máximo 16 caracteres.');
+                    nickInput.classList.add('incorreto');
+                    validationState.nick = false;
+                } else if (!/^[a-zA-Z0-9._]+$/.test(value)) {
+                    showError(nickError, 'Nome de utilizador só pode conter letras, números, pontos e sublinhados.');
+                    nickInput.classList.add('incorreto');
+                    validationState.nick = false;
+                } else if (/\s/.test(value)) {
+                    showError(nickError, 'Nome de utilizador não pode conter espaços.');
+                    nickInput.classList.add('incorreto');
+                    validationState.nick = false;
+                } else {
+                    // Check if nick is available
+                    checkNickAvailability(value);
+                }
+                
+                updateSubmitButton();
+            }
+
+            // Email validation
+            function validateEmail() {
+                const value = emailInput.value.trim();
+                
+                if (value.length === 0) {
+                    hideError(emailError);
+                    emailInput.classList.remove('incorreto');
+                    validationState.email = false;
+                } else if (!value.includes('@') || !value.includes('.')) {
+                    showError(emailError, 'Email inválido.');
+                    emailInput.classList.add('incorreto');
+                    validationState.email = false;
+                } else {
+                    // Check if email is available
+                    checkEmailAvailability(value);
+                }
+                
+                updateSubmitButton();
+            }
+
+            // Password validation
+            function validatePassword() {
+                const value = passwordInput.value;
+                
+                if (value.length === 0) {
+                    hideError(passwordError);
+                    passwordInput.classList.remove('incorreto');
+                    validationState.password = false;
+                } else if (value.length < 6) {
+                    showError(passwordError, 'A palavra-passe deve ter pelo menos 6 caracteres.');
+                    passwordInput.classList.add('incorreto');
+                    validationState.password = false;
+                } else {
+                    hideError(passwordError);
+                    passwordInput.classList.remove('incorreto');
+                    validationState.password = true;
+                }
+                
+                // Re-validate confirm password when password changes
+                validateConfirmPassword();
+                updateSubmitButton();
+            }
+
+            // Confirm password validation
+            function validateConfirmPassword() {
+                const password = passwordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+                
+                if (confirmPassword.length === 0) {
+                    hideError(confirmPasswordError);
+                    confirmPasswordInput.classList.remove('passred');
+                    validationState.confirmPassword = false;
+                } else if (password !== confirmPassword) {
+                    showError(confirmPasswordError, 'As palavras-passe não coincidem.');
+                    confirmPasswordInput.classList.add('passred');
+                    validationState.confirmPassword = false;
+                } else {
+                    hideError(confirmPasswordError);
+                    confirmPasswordInput.classList.remove('passred');
+                    validationState.confirmPassword = true;
+                }
+                
+                updateSubmitButton();
+            }
+
+            // Date validation
+            function validateDate() {
+                const value = dateInput.value;
+                
+                if (!value) {
+                    hideError(dateError);
+                    dateInput.classList.remove('incorreto');
+                    validationState.date = false;
+                    updateSubmitButton();
+                    return;
+                }
+
+                const today = new Date();
+                const selectedDate = new Date(value);
+                let age = today.getFullYear() - selectedDate.getFullYear();
+                const monthDiff = today.getMonth() - selectedDate.getMonth();
+                const dayDiff = today.getDate() - selectedDate.getDate();
+
+                if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+                    age--;
+                }
+
+                if (age < 13) {
+                    showError(dateError, 'Tens de ser maior de 13 anos.');
+                    dateInput.classList.add('incorreto');
+                    validationState.date = false;
+                } else if (age > 115) {
+                    showError(dateError, 'Introduza uma data de nascimento real.');
+                    dateInput.classList.add('incorreto');
+                    validationState.date = false;
+                } else {
+                    hideError(dateError);
+                    dateInput.classList.remove('incorreto');
+                    validationState.date = true;
+                }
+
+                updateSubmitButton();
+            }
+
+            // Terms validation
+            function validateTerms() {
+                validationState.terms = termsCheckbox.checked;
+                updateSubmitButton();
+            }
+
+            // API calls for availability checks
+            async function checkNickAvailability(nick) {
+                try {
+                    const response = await fetch(`../backend/check_nick.php?nick=${encodeURIComponent(nick)}`);
+                    const result = await response.text();
+                    
+                    if (result === 'exist') {
+                        showError(nickError, 'Nome de utilizador já está em uso.');
+                        nickInput.classList.add('incorreto');
+                        validationState.nick = false;
+                    } else {
+                        hideError(nickError);
+                        nickInput.classList.remove('incorreto');
+                        validationState.nick = true;
+                    }
+                } catch (error) {
+                    console.error('Erro ao verificar nick:', error);
+                    showError(nickError, 'Erro ao verificar disponibilidade.');
+                    validationState.nick = false;
+                }
+                
+                updateSubmitButton();
+            }
+
+            async function checkEmailAvailability(email) {
+                try {
+                    const response = await fetch(`../backend/check_email.php?email=${encodeURIComponent(email)}`);
+                    const result = await response.text();
+                    
+                    if (result === 'exist') {
+                        showError(emailError, 'Email já está em uso.');
+                        emailInput.classList.add('incorreto');
+                        validationState.email = false;
+                    } else {
+                        hideError(emailError);
+                        emailInput.classList.remove('incorreto');
+                        validationState.email = true;
+                    }
+                } catch (error) {
+                    console.error('Erro ao verificar email:', error);
+                    showError(emailError, 'Erro ao verificar disponibilidade.');
+                    validationState.email = false;
+                }
+                
+                updateSubmitButton();
+            }
+
+            // Event listeners
+            nameInput.addEventListener('input', function(e) {
+                // Remove números enquanto digita
+                this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '');
+                validateName();
+            });
+
+            nameInput.addEventListener('blur', function() {
+                if (this.value.trim()) {
+                    this.value = capitalizeName(this.value);
+                    validateName();
                 }
             });
 
-            if (passwordInput.value !== confirmPasswordInput.value || !termsCheckbox.checked) {
-                isValid = false;
-            }
+            emailInput.addEventListener('input', validateEmail);
+            emailInput.addEventListener('blur', validateEmail);
 
-            submitBtn.disabled = !isValid;
-        }
+            dateInput.addEventListener('change', validateDate);
+            dateInput.addEventListener('blur', validateDate);
 
-        function validateDate() {
-            const today = new Date();
-            const selectedDate = new Date(dateInput.value);
-            let age = today.getFullYear() - selectedDate.getFullYear();
-            const monthDiff = today.getMonth() - selectedDate.getMonth();
-            const dayDiff = today.getDate() - selectedDate.getDate();
+            nickInput.addEventListener('input', function() {
+                // Remove espaços enquanto digita
+                this.value = this.value.replace(/\s/g, '');
+                validateNick();
+            });
 
-            if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-                age--; // Ajusta se o aniversário ainda não passou neste ano.
-            }
+            nickInput.addEventListener('blur', validateNick);
 
-            if (age < 13) {
-                dateError.textContent = "Tens de ser maior de 13 anos.";
-                dateError.style.color = 'red';
-                dateInput.classList.add('incorreto');
-            } else if (age > 115) {
-                dateError.textContent = "Introduza uma data de nascimento real.";
-                dateError.style.color = 'red';
-                dateInput.classList.add('incorreto');
-            } else {
-                dateError.style.color = 'transparent';
-                dateInput.classList.remove('incorreto');
-            }
+            passwordInput.addEventListener('input', validatePassword);
+            confirmPasswordInput.addEventListener('input', validateConfirmPassword);
+            termsCheckbox.addEventListener('change', validateTerms);
 
-            // Usa checkFormValidity no lugar de toggleSubmitButton
-            checkFormValidity();
-        }
-    });
-</script>
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                // Final validation before submit
+                validateName();
+                validateEmail();
+                validateDate();
+                validateNick();
+                validatePassword();
+                validateConfirmPassword();
+                validateTerms();
+
+                const allValid = Object.values(validationState).every(state => state === true);
+                
+                if (!allValid) {
+                    e.preventDefault();
+                    
+                    // Show which fields are invalid
+                    const invalidFields = [];
+                    if (!validationState.name) invalidFields.push('Nome');
+                    if (!validationState.email) invalidFields.push('Email');
+                    if (!validationState.date) invalidFields.push('Data de nascimento');
+                    if (!validationState.nick) invalidFields.push('Nome de utilizador');
+                    if (!validationState.password) invalidFields.push('Palavra-passe');
+                    if (!validationState.confirmPassword) invalidFields.push('Confirmação de palavra-passe');
+                    if (!validationState.terms) invalidFields.push('Termos e condições');
+                    
+                    alert('Por favor, corrija os seguintes campos: ' + invalidFields.join(', '));
+                    return false;
+                }
+
+                // Disable button to prevent double submission
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Criando conta...';
+            });
+
+            // Initialize validation state
+            updateSubmitButton();
+        });
+    </script>
 </body>
 
 </html>
