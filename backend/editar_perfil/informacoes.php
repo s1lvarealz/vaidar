@@ -21,7 +21,7 @@ $cidade = trim($_POST["cidade"]);
 // Validações
 if (!preg_match("/^[a-zA-Z0-9._]{3,16}$/", $nick)) {
     $_SESSION["erro"] = "O nome de utilizador deve ter entre 3 e 16 caracteres e só pode conter letras, números, pontos e sublinhados.";
-    header("Location: ../../frontend/editar_perfil.php#profile-info");
+    header("Location: ../../frontend/editar_perfil.php?section=profile-info&status=error");
     exit();
 }
 
@@ -61,7 +61,7 @@ function isValidBirthDate($date) {
 if (!isValidBirthDate($data)){
 
     $_SESSION["erro"] = "A data é inválida.";
-    header("Location: ../../frontend/editar_perfil.php#profile-info");
+    header("Location: ../../frontend/editar_perfil.php?section=profile-info&status=error");
     exit();
 }
 
@@ -69,7 +69,25 @@ if (!isValidBirthDate($data)){
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     $_SESSION["erro"] = "O email é inválido.";
-    header("Location: ../../frontend/editar_perfil.php#profile-info");
+    header("Location: ../../frontend/editar_perfil.php?section=profile-info&status=error");
+    exit();
+}
+
+// Verificar se o nick já existe (excluindo o utilizador atual)
+$sqlCheckNick = "SELECT id FROM utilizadores WHERE nick = '$nick' AND id != '$id'";
+$resultCheckNick = mysqli_query($con, $sqlCheckNick);
+if (mysqli_num_rows($resultCheckNick) > 0) {
+    $_SESSION["erro"] = "Este nome de utilizador já está em uso.";
+    header("Location: ../../frontend/editar_perfil.php?section=profile-info&status=error");
+    exit();
+}
+
+// Verificar se o email já existe (excluindo o utilizador atual)
+$sqlCheckEmail = "SELECT id FROM utilizadores WHERE email = '$email' AND id != '$id'";
+$resultCheckEmail = mysqli_query($con, $sqlCheckEmail);
+if (mysqli_num_rows($resultCheckEmail) > 0) {
+    $_SESSION["erro"] = "Este email já está em uso.";
+    header("Location: ../../frontend/editar_perfil.php?section=profile-info&status=error");
     exit();
 }
 
@@ -83,7 +101,7 @@ $resultado = mysqli_query($con, $sql);
 
 if(!$resultado){
     $_SESSION["erro"] = "Erro ao atualizar informações.";
-    header("Location: ../../frontend/editar_perfil.php#profile-info");
+    header("Location: ../../frontend/editar_perfil.php?section=profile-info&status=error");
     exit();
 }
 
@@ -97,10 +115,10 @@ $resultado = mysqli_query($con, $sql);
 
 if(!$resultado){
     $_SESSION["erro"] = "Erro ao atualizar informações.";
-    header("Location: ../../frontend/editar_perfil.php#profile-info");
+    header("Location: ../../frontend/editar_perfil.php?section=profile-info&status=error");
     exit();
 }
 
-$_SESSION["erro"] = "Informações atualizadas com sucesso!";
-header("Location: ../../frontend/editar_perfil.php#profile-info");
+$_SESSION["sucesso"] = "Informações básicas atualizadas com sucesso!";
+header("Location: ../../frontend/editar_perfil.php?section=profile-info&status=success");
 ?>

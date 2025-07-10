@@ -331,6 +331,8 @@ $perfilData = mysqli_fetch_assoc($resultPerfil);
                 </div>
             </div>
         </main>
+        <!-- Sugestões de Utilizadores -->
+        <?php require("parciais/suggestions.php"); ?>
     </div>
 
     <!-- Toast Notification -->

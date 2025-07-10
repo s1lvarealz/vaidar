@@ -22,11 +22,11 @@ $resultado = mysqli_query($con, $sql);
 
 if (!$resultado) {
     $_SESSION["erro"] = "Erro ao atualizar informações.";
-    header("Location: ../../frontend/editar_perfil.php#professional-info");
+    header("Location: ../../frontend/editar_perfil.php?section=professional-info&status=error");
     exit();
 }
 
 
-$_SESSION["erro"] = "Informações atualizadas com sucesso!";
-header("Location: ../../frontend/editar_perfil.php#professional-info");
+$_SESSION["sucesso"] = "Informações profissionais atualizadas com sucesso!";
+header("Location: ../../frontend/editar_perfil.php?section=professional-info&status=success");
 ?>

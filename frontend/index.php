@@ -571,6 +571,9 @@ $perfilData = mysqli_fetch_assoc($resultPerfil);
                 </div>
             </div>
         </main>
+
+        <!-- Sugestões de Utilizadores -->
+        <?php require("parciais/suggestions.php"); ?>
     </div>
 
     <?php require "parciais/footer.php" ?>

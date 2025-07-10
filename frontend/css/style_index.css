@@ -72,7 +72,7 @@ p {
   display: flex;
   max-width: 1280px;
   margin: 0 auto;
-  padding: var(--space-xl);
+  padding: var(--space-lg) var(--space-xl);
   width: 100%;
   min-height: calc(100vh - var(--header-height));
   gap: var(--space-xl);
@@ -102,12 +102,13 @@ p {
    6. Sidebar
    -------------------------------------------------------------------------- */
 .sidebar {
-  width: var(--sidebar-width);
+  width: 220px;
   position: sticky;
   top: var(--header-height);
   height: calc(100vh - var(--header-height));
   padding: var(--space-xl) 0;
   overflow-y: auto;
+  flex-shrink: 0;
 }
 
 .sidebar a {
@@ -144,7 +145,8 @@ p {
    -------------------------------------------------------------------------- */
 .feed {
   flex: 1;
-  max-width: 700px;
+  max-width: 600px;
+  min-width: 0;
 }
 
 /* --------------------------------------------------------------------------
@@ -465,11 +467,12 @@ footer {
 /* Media Queries */
 @media (max-width: 1200px) {
   .container {
-    padding: var(--space-lg);
+    padding: var(--space-md) var(--space-lg);
+    gap: var(--space-lg);
   }
 
   .sidebar {
-    width: var(--sidebar-collapsed-width);
+    width: 200px;
   }
 
   .sidebar span {
@@ -484,11 +487,16 @@ footer {
   .sidebar i {
     margin: 0;
   }
+
+  .feed {
+    max-width: 100%;
+  }
 }
 
 @media (max-width: 992px) {
   .container {
     flex-direction: column;
+    gap: var(--space-md);
   }
 
   .sidebar {
@@ -540,6 +548,7 @@ footer {
   .container {
     padding: var(--space-md);
     margin-top: var(--header-height);
+    gap: var(--space-md);
   }
 
   .user ul {

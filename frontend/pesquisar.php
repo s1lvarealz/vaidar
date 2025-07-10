@@ -879,6 +879,8 @@ $excludeSelf = $userId ? "AND u.id != $userId" : "";
                 </div>
             </section>
         </main>
+        <!-- Sugestões de Utilizadores -->
+        <?php require("parciais/suggestions.php"); ?>
 
 
         <script>
